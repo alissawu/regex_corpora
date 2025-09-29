@@ -63,7 +63,7 @@ with open(filename, 'r', encoding='utf-8') as file:
     # Cents-only 
     D = rf"""(?:{INT}\s+{CURR_CENT}|{VERBAL_0_99}\s+{CURR_CENT})"""
 
-    ALL = rf"""(?:{A}|{B}|{C})\b"""   # add |{D} if you keep cents-only
+    ALL = rf"""(?:{A}|{B}|{C}|{D})\b"""   
     pattern = re.compile(ALL, re.IGNORECASE | re.VERBOSE)
     matches = pattern.findall(content)
     for m in matches:
