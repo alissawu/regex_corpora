@@ -65,5 +65,7 @@ with open(filename, 'r', encoding='utf-8') as file:
 
     ALL = rf"""(?:{A}|{B}|{C})\b"""   # add |{D} if you keep cents-only
     pattern = re.compile(ALL, re.IGNORECASE | re.VERBOSE)
-    match = re.findall(pattern, content)
-    print(match)
+    matches = pattern.findall(content)
+    for m in matches:
+        print(m)
+
