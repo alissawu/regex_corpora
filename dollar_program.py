@@ -60,10 +60,7 @@ with open(filename, 'r', encoding='utf-8') as file:
     # (allows "one hundred dollars", "twenty-five million dollars", etc.)
     C = rf"""{VERBAL_0_999}(?:\s+{MAG_ANY})?\s+{CURR_DOLLAR}{CENTS_TAIL}"""
 
-    # Cents-only 
-    D = rf"""(?:{INT}\s+{CURR_CENT}|{VERBAL_0_99}\s+{CURR_CENT})"""
-
-    ALL = rf"""(?:{A}|{B}|{C}|{D})\b"""   
+    ALL = rf"""(?:{A}|{B}|{C})\b"""  
     pattern = re.compile(ALL, re.IGNORECASE | re.VERBOSE)
     matches = pattern.findall(content)
     for m in matches:
