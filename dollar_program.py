@@ -1,68 +1,20 @@
-#!/usr/bin/env python3
-import sys
 import re
+import sys
 
-filename = sys.argv[1]
+def extract_dollar_amounts(input_file):
+    with open(input_file, 'r', encoding='utf-8') as file:
+        content = file.read()
+    
+    pattern = r'(?:[$][0-9\,]+(?:\.[0-9]+)?(?:\s(?:hundred|thousand|million|billion|trillion|gazillion))?)|(?:(?:(?:[0-9]+(?:[0-9\,]+)?(?:\.[0-9]+)?)|one|two|three|four|five|six|seven|eight|nine|ten|tens|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|half|quarter|a)\s)+(?:(?:(?:(?:[0-9]+(?:[0-9\,]+)?(?:\.[0-9]+)?)|one|two|three|four|five|six|seven|eight|nine|ten|tens|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety|half|quarter|a|of|hundred|hundreds|thousand|thousands|million|millions|billion|billions|trillion|trillions|gazillion)\s)+)?\b(?:dollar|dollars|cent|cents)\b'
+    match = re.findall(pattern, content, re.IGNORECASE | re.VERBOSE)
 
-# integers - numbers, commas, decimals
-INT = r"""
-(?:                             # non-capturing
-    (?:\d{1,3}(?:,\d{3})+|\d+)  # commas or just digits
-    (?:\.\d+)?                  # optional decimal
-)
-"""
+    # Write found dollar amounts to output file
+    with open('dollar_output.txt', 'w', encoding='utf-8') as output_file:
+        for amt in match:
+            output_file.write(amt.strip() + '\n')
 
-# magnitudes - verbal
-MAG_TALL = r"""(?:thousand|million|billion|trillion)s?"""
-MAG_ANY  = rf"""(?:hundred|{MAG_TALL})"""
+def main():
+    extract_dollar_amounts(sys.argv[1])
 
-# currency words
-CURR_DOLLAR = r"""dollars?"""
-CURR_CENT   = r"""cents?"""
-
-# verbal numbers
-ONES  = r"one|two|three|four|five|six|seven|eight|nine"
-TEENS = r"ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen"
-TENS  = r"twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety"
-
-VERBAL_0_99 = rf"(?:{TENS})(?:-(?:{ONES}))?|{TEENS}|{ONES}"
-
-# 0–999 as words
-VERBAL_0_999 = rf"""
-(?:
-    (?:a|one|{ONES}|{TEENS}|{TENS}(?:-(?:{ONES}))?)
-    (?:\s+hundred(?:\s+and\s+{VERBAL_0_99})?)?
-  | {VERBAL_0_99}
-)
-"""
-
-# optional "and ... cents" tail
-CENTS_TAIL = rf"""
-(?:
-    \s*(?:and\s+)?                  # optional "and "
-    (?:
-        \d{{1,2}}                   # 5, 25, 99
-      | {VERBAL_0_99}               # five, twenty-five
-    )
-    \s+{CURR_CENT}                  # cent/cents
-)?
-"""
-with open(filename, 'r', encoding='utf-8') as file: 
-    content = file.read()
-
-    # Branch A: $ + INT + [MAG_TALL] + [dollars] + [and ... cents]
-    A = rf"""\$\s*{INT}(?:\s+{MAG_TALL})?(?:\s+{CURR_DOLLAR})?{CENTS_TAIL}"""
-
-    # Branch B: INT + [MAG_TALL] + (dollars|cents) + [and ... cents]
-    B = rf"""{INT}(?:\s+{MAG_TALL})?\s+(?:{CURR_DOLLAR}|{CURR_CENT}){CENTS_TAIL}"""
-
-    # Branch C: VERBAL(0–999) + [MAG_ANY] + dollars + [and ... cents]
-    # (allows "one hundred dollars", "twenty-five million dollars", etc.)
-    C = rf"""{VERBAL_0_999}(?:\s+{MAG_ANY})?\s+{CURR_DOLLAR}{CENTS_TAIL}"""
-
-    ALL = rf"""(?:{A}|{B}|{C})\b"""  
-    pattern = re.compile(ALL, re.IGNORECASE | re.VERBOSE)
-    matches = pattern.findall(content)
-    for m in matches:
-        print(m)
-
+if __name__ == '__main__':
+    main()
